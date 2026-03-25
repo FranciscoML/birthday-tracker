@@ -3,6 +3,8 @@ import webpush from "web-push";
 import { supabaseAdmin } from "@/lib/supabase";
 import { isToday } from "@/lib/helpers";
 
+export const dynamic = "force-dynamic";
+
 webpush.setVapidDetails(
   process.env.VAPID_EMAIL!,
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
@@ -10,6 +12,7 @@ webpush.setVapidDetails(
 );
 
 export async function GET() {
+  // Obtener cumpleaños de hoy
   const { data: birthdays } = await supabaseAdmin
     .from("birthdays")
     .select("name, day, month");
@@ -28,6 +31,7 @@ export async function GET() {
     body: names,
   });
 
+  // Obtener todas las suscripciones
   const { data: subs } = await supabaseAdmin
     .from("push_subscriptions")
     .select("endpoint, p256dh, auth");
@@ -41,6 +45,7 @@ export async function GET() {
       );
       sent++;
     } catch {
+      // Suscripción expirada — eliminar
       await supabaseAdmin
         .from("push_subscriptions")
         .delete()

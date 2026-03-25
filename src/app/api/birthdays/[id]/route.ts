@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 import type { BirthdayFormData } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const body: BirthdayFormData = await req.json();
 
