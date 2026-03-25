@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import type { BirthdayFormData } from "@/types";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from("birthdays")
     .select("*")
     .order("month", { ascending: true })
-    .order("day", { ascending: true });
+    .order("day",   { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
@@ -18,14 +18,14 @@ export async function GET() {
 export async function POST(req: Request) {
   const body: BirthdayFormData = await req.json();
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from("birthdays")
     .insert({
-      name: body.name.trim(),
-      note: body.note?.trim() || null,
-      day: body.day,
+      name:  body.name.trim(),
+      note:  body.note?.trim() || null,
+      day:   body.day,
       month: body.month,
-      year: body.year || null,
+      year:  body.year || null,
     })
     .select()
     .single();

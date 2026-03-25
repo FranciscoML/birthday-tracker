@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import type { BirthdayFormData } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -7,14 +7,14 @@ export const dynamic = "force-dynamic";
 export async function PUT(req: Request, { params }: { params: { id: string } }) {
   const body: BirthdayFormData = await req.json();
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getSupabaseAdmin()
     .from("birthdays")
     .update({
-      name: body.name.trim(),
-      note: body.note?.trim() || null,
-      day: body.day,
+      name:  body.name.trim(),
+      note:  body.note?.trim() || null,
+      day:   body.day,
       month: body.month,
-      year: body.year || null,
+      year:  body.year || null,
     })
     .eq("id", params.id)
     .select()
@@ -25,7 +25,7 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 export async function DELETE(_: Request, { params }: { params: { id: string } }) {
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("birthdays")
     .delete()
     .eq("id", params.id);

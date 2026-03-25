@@ -1,19 +1,18 @@
 import { NextResponse } from "next/server";
 import webpush from "web-push";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { isToday } from "@/lib/helpers";
 
 export const dynamic = "force-dynamic";
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL!,
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
-  process.env.VAPID_PRIVATE_KEY!
-);
-
 export async function GET() {
-  // Obtener cumpleaños de hoy
-  const { data: birthdays } = await supabaseAdmin
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL!,
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+    process.env.VAPID_PRIVATE_KEY!
+  );
+
+  const { data: birthdays } = await getSupabaseAdmin()
     .from("birthdays")
     .select("name, day, month");
 
@@ -21,18 +20,12 @@ export async function GET() {
     isToday(b.day, b.month)
   );
 
-  if (todaysBirthdays.length === 0) {
-    return NextResponse.json({ sent: 0 });
-  }
+  if (todaysBirthdays.length === 0) return NextResponse.json({ sent: 0 });
 
-  const names = todaysBirthdays.map((b) => b.name).join(", ");
-  const payload = JSON.stringify({
-    title: "🎂 ¡Cumpleaños hoy!",
-    body: names,
-  });
+  const names   = todaysBirthdays.map((b) => b.name).join(", ");
+  const payload = JSON.stringify({ title: "🎂 ¡Cumpleaños hoy!", body: names });
 
-  // Obtener todas las suscripciones
-  const { data: subs } = await supabaseAdmin
+  const { data: subs } = await getSupabaseAdmin()
     .from("push_subscriptions")
     .select("endpoint, p256dh, auth");
 
@@ -45,8 +38,7 @@ export async function GET() {
       );
       sent++;
     } catch {
-      // Suscripción expirada — eliminar
-      await supabaseAdmin
+      await getSupabaseAdmin()
         .from("push_subscriptions")
         .delete()
         .eq("endpoint", sub.endpoint);

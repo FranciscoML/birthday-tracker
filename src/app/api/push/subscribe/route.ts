@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { getSupabaseAdmin } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   const { endpoint, keys } = await req.json();
 
-  const { error } = await supabaseAdmin
+  const { error } = await getSupabaseAdmin()
     .from("push_subscriptions")
     .upsert(
       { endpoint, p256dh: keys.p256dh, auth: keys.auth },
